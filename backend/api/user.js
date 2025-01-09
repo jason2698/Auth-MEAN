@@ -58,7 +58,45 @@ router.post('/signup', (req,res)=>{
 
 //Signin
 router.post('/signin', (req, res)=>{
+    let{ email, password} = req.body;
+    email = email.trim();
+    password = password.trim();
 
+    User.find({email}).then(data=>{
+        if(data.length){
+            console.log("login response : ", data)
+            const hashedPassword = data[0]?.password;
+            bcrypt.compare(password, hashedPassword).then(result=>{
+                if(result){
+                    res.json({
+                        status: "Success",
+                        message: "Signin successful",
+                        data: data
+                    })
+                }else{
+                    res.json({
+                        status: "Failed",
+                        message: "Invalid password entered!",
+                    })
+                }
+            }).catch(err=>{
+                res.json({
+                    status: "Failed",
+                    message: "Error occured while comparing password"
+                })
+            })
+        }else{
+            res.json({
+                status: "Failed",
+                message: "Invalid credential entered!",
+            })
+        }
+    }).catch(err=>{
+        res.json({
+            status: "Failed",
+            message : "An error occured while login"
+        })
+    })
 })
 
 module.exports = router;
