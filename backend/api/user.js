@@ -1,11 +1,20 @@
 const express = require('express');
 const router = express.Router();
 
-//DB details
+//DB details for User
 const User = require('./../models/user');
+
+//DB details for User Verification
+const UserVerification = require('./../models/userVerification');
 
 //password handler
 const bcrypt = require('bcrypt');
+
+//Email handler
+const nodeMailer = require('nodemailer');
+
+//unique string
+const {v4: uuidv4} = require("uuid")
 
 //signup
 router.post('/signup', (req,res)=>{
@@ -64,7 +73,6 @@ router.post('/signin', (req, res)=>{
 
     User.find({email}).then(data=>{
         if(data.length){
-            console.log("login response : ", data)
             const hashedPassword = data[0]?.password;
             bcrypt.compare(password, hashedPassword).then(result=>{
                 if(result){
