@@ -39,6 +39,9 @@ transporter.verify((error, success)=>{
     }
 })
 
+//path for static verified page
+const path = require("path");
+
 //signup
 router.post('/signup', (req,res)=>{
     let{name, email, password, dateOfBirth} = req.body;
@@ -195,6 +198,33 @@ router.post('/signin', (req, res)=>{
             message : "An error occured while login"
         })
     })
+})
+
+//Verify email
+router.get("/verify/:userId/:uniqueString", (req,res)=>{
+    let { userId, uniqueString } = req.params;
+
+    UserVerification.find({userId})
+    .then((result)=>{
+        if(result.length > 0){
+
+        }else{
+            //User verification record doesn't exist
+            let message = "Account record doesn't exist or has been verified already. Please Sign up or login.";
+            res.redirect(`/user/verified/error=true&message=${message}`);
+        }
+    })
+    .catch((error)=>{
+        console.log(error);
+        let message = "An error occured while checking for existing user verification record";
+        res.redirect(`/user/verified/error=true&message=${message}`);
+    })
+})
+
+// verified page route
+router.get("/verified", (req,res)=>{
+
+    res.sendFile(path.join(__dirname, "./../views/verified.html"));
 })
 
 module.exports = router;
