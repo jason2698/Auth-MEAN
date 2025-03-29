@@ -207,6 +207,33 @@ router.get("/verify/:userId/:uniqueString", (req,res)=>{
     UserVerification.find({userId})
     .then((result)=>{
         if(result.length > 0){
+            //user verification record exist
+
+            const { expiresAt } = result[0];
+
+            //checking for expired unique string
+            if(expiresAt < Date.now()){
+                //Record has expired sp we delete it
+                UserVerification.deleteOne({ userId })
+                .then(result =>{
+                    User.deleteOne({_id: userId})
+                    .then(()=>{
+                        let message = "Link has expired. Please sign up again.";
+                        res.redirect(`/user/verified/error=true&message=${message}`)
+                    })
+                    .catch(error =>{
+                        let message = "Clearing user with expired unique string failed";
+                        res.redirect(`/user/verified/error=true&message=${message}`)
+                    })
+                })
+                .catch((error)=>{
+                    console.log(error);
+                    let message = "An error occured while clearing expired user verification record!";
+                    res.redirect(`/user/verified/error=true&message=${message}`)
+                })
+            } else {
+                // Valid record exists so we validate 
+            }
 
         }else{
             //User verification record doesn't exist
